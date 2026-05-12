@@ -1,33 +1,30 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { registerAPI } from '../service/api';
+import toast from 'react-hot-toast';
 
 const Register = () => {
     const [email, setEmail] = useState('');
     const [displayName, setDisplayName] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const navigate = useNavigate();
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        setError('');
-        setSuccess('');
         if (password !== confirmPassword) {
-            setError('Mật khẩu xác nhận không khớp!');
+            toast.error('Mật khẩu xác nhận không khớp!');
             return;
         }
 
         try {
             const data = await registerAPI(email, displayName, password, confirmPassword);
             if (data.status === 'success') {
-                setSuccess('Đăng ký thành công! Đang chuyển về trang Đăng nhập...');
+                toast.success('Đăng ký thành công! Đang chuyển về trang Đăng nhập...');
                 setTimeout(() => navigate('/login'), 2000);
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Không thể kết nối đến Máy chủ!');
+            toast.error(err.response?.data?.message || 'Không thể kết nối đến Máy chủ!');
         }
     };
 
@@ -43,8 +40,7 @@ const Register = () => {
                                     <p className="text-muted small">Bắt đầu ghi chú với Super Note</p>
                                 </div>
                                 
-                                {error && <div className="alert alert-danger rounded-3 py-2 text-center small">{error}</div>}
-                                {success && <div className="alert alert-success rounded-3 py-2 text-center small">{success}</div>}
+                                {/* Notification handled by Toast */}
 
                                 <form onSubmit={handleRegister}>
                                     <div className="mb-3">

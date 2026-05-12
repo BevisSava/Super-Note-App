@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { loginAPI } from '../service/api';
+import toast from 'react-hot-toast';
 import { FaUser, FaLock  } from "react-icons/fa";
 
 const Login = () => {
@@ -18,7 +19,7 @@ const Login = () => {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user_name', data.user.display_name);
                 localStorage.setItem('user_id', data.user.id);
-                alert('Đăng nhập thành công, chào mừng ' + data.user.display_name + '!');
+                toast.success('Đăng nhập thành công, chào mừng ' + data.user.display_name + '!');
                 navigate('/home');
             }
         } catch (err) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getNotesAPI, deleteNoteAPI, lockNoteAPI, unlockNoteAPI, shareNoteAPI, togglePinAPI, getProfileAPI, getLabelsAPI, BACKEND_URL } from '../service/api';
+import toast from 'react-hot-toast';
 import { MdMenu, MdSearch, MdLightbulbOutline, MdOutlinePeopleAlt, MdOutlineLabel, MdEdit, MdGridView, MdViewAgenda } from "react-icons/md";
 import { FaUserCircle } from "react-icons/fa";
 import NoteCard from '../components/NoteCard';
@@ -73,9 +74,9 @@ const Home = () => {
         if (!pass1) return;
         const pass2 = window.prompt("Vui lòng nhập LẠI mật khẩu lần nữa để xác nhận:");
         if (!pass2) return;
-        if (pass1 !== pass2) { alert("Mật khẩu hai lần nhập không khớp!"); return; }
-        try { await lockNoteAPI(id, pass1); alert("Đã khóa ghi chú!"); fetchNotes(); }
-        catch { alert("Lỗi khi khóa!"); }
+        if (pass1 !== pass2) { toast.error("Mật khẩu hai lần nhập không khớp!"); return; }
+        try { await lockNoteAPI(id, pass1); toast.success("Đã khóa ghi chú!"); fetchNotes(); }
+        catch { toast.error("Lỗi khi khóa!"); }
     };
 
     const handleUnlockNote = async (id) => {
@@ -85,28 +86,28 @@ const Home = () => {
                 const response = await unlockNoteAPI(id, password);
                 if (response.status === 'success') {
                     setNotes(prev => prev.map(n => n.id === id ? { ...n, is_locked: false, temp_unlocked: true, content: response.data?.content } : n));
-                } else alert("Sai mật khẩu!");
-            } catch { alert("Sai mật khẩu!"); }
+                } else toast.error("Sai mật khẩu!");
+            } catch { toast.error("Sai mật khẩu!"); }
         }
     };
 
     const handleRemoveLock = async (id) => {
         if (window.confirm("Bỏ mật khẩu để Sửa/Xóa ghi chú này?")) {
-            try { await lockNoteAPI(id, ""); fetchNotes(); } catch { alert("Lỗi gỡ khóa!"); }
+            try { await lockNoteAPI(id, ""); toast.success("Đã gỡ khóa ghi chú"); fetchNotes(); } catch { toast.error("Lỗi gỡ khóa!"); }
         }
     };
 
     const handleDelete = async (id) => {
         if (window.confirm("Xóa ghi chú này?")) {
-            try { await deleteNoteAPI(id); fetchNotes(); } catch { alert("Lỗi khi xóa!"); }
+            try { await deleteNoteAPI(id); toast.success("Đã xóa ghi chú"); fetchNotes(); } catch { toast.error("Lỗi khi xóa!"); }
         }
     };
 
     const handleShareNote = async (id) => {
         const email = window.prompt("Nhập Email người nhận:");
         if (email) {
-            try { await shareNoteAPI(id, email); alert("Đã chia sẻ thành công!"); }
-            catch (err) { alert("Thất bại: " + (err.response?.data?.message || "Lỗi")); }
+            try { await shareNoteAPI(id, email); toast.success("Đã chia sẻ thành công!"); }
+            catch (err) { toast.error("Thất bại: " + (err.response?.data?.message || "Lỗi")); }
         }
     };
 
@@ -115,7 +116,7 @@ const Home = () => {
         try {
             await togglePinAPI(id, newPinnedStatus);
             fetchNotes();
-        } catch (err) { alert("Lỗi khi ghim/bỏ ghim!", err); }
+        } catch (err) { toast.error("Lỗi khi ghim/bỏ ghim!"); }
     };
 
     const displayedNotes = notes.filter(note => {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getLabelsAPI, createLabelAPI, updateLabelAPI, deleteLabelAPI } from '../service/api';
+import toast from 'react-hot-toast';
 
 const LabelModal = ({ show, onClose }) => {
     const [labels, setLabels] = useState([]);
@@ -33,7 +34,7 @@ const LabelModal = ({ show, onClose }) => {
             await createLabelAPI(newLabelName);
             setNewLabelName('');
             fetchLabels();
-        } catch (err) { alert("Lỗi khi thêm nhãn!",err); }
+        } catch (err) { toast.error("Lỗi khi thêm nhãn!"); }
     };
 
     // Hàm Xóa nhãn
@@ -42,7 +43,7 @@ const LabelModal = ({ show, onClose }) => {
         try {
             await deleteLabelAPI(id);
             fetchLabels();
-        } catch (err) { alert("Lỗi khi xóa nhãn!",err); }
+        } catch (err) { toast.error("Lỗi khi xóa nhãn!"); }
     };
 
     // Hàm Bật chế độ sửa
@@ -58,7 +59,7 @@ const LabelModal = ({ show, onClose }) => {
             await updateLabelAPI(id, editingName);
             setEditingId(null);
             fetchLabels();
-        } catch (err) { alert("Lỗi khi đổi tên nhãn!",err); }
+        } catch (err) { toast.error("Lỗi khi đổi tên nhãn!"); }
     };
 
     if (!show) return null;

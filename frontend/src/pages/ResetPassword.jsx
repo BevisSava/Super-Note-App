@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { resetPasswordAPI } from '../service/api';
+import toast from 'react-hot-toast';
 
 const ResetPassword = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [isLoading, setIsLoading] = useState(false);
     const [token, setToken] = useState(null);
     const navigate = useNavigate();
@@ -13,22 +13,22 @@ const ResetPassword = () => {
     useEffect(() => {
         const urlToken = new URLSearchParams(window.location.search).get('token');
         setToken(urlToken);
-        if (!urlToken) setMessage({ type: 'danger', text: 'Đường dẫn không hợp lệ!' });
+        if (!urlToken) toast.error('Đường dẫn không hợp lệ!');
     }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (newPassword !== confirmPassword) {
-            setMessage({ type: 'warning', text: 'Mật khẩu không khớp!' });
+            toast.error('Mật khẩu không khớp!');
             return;
         }
         setIsLoading(true);
         try {
             const res = await resetPasswordAPI(token, newPassword, confirmPassword);
-            setMessage({ type: 'success', text: res.message });
+            toast.success(res.message);
             setTimeout(() => navigate('/login'), 3000); // Đá về Login
         } catch (err) {
-            setMessage({ type: 'danger', text: err.response?.data?.message || 'Lỗi đổi mật khẩu.' });
+            toast.error(err.response?.data?.message || 'Lỗi đổi mật khẩu.');
         } finally {
             setIsLoading(false);
         }
@@ -45,7 +45,7 @@ const ResetPassword = () => {
                                     <h4 className="fw-bold text-danger mb-2">Mật Khẩu Mới</h4>
                                     <p className="text-muted small">Vui lòng nhập mật khẩu mới của bạn</p>
                                 </div>
-                                {message.text && <div className={`alert alert-${message.type} rounded-3 py-2 text-center small`}>{message.text}</div>}
+                                {/* Notification handled by Toast */}
                                 <form onSubmit={handleSubmit}>
                                     <div className="mb-3">
                                         <label className="form-label fw-medium text-secondary small mb-1">Mật khẩu mới</label>

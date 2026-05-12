@@ -1,5 +1,6 @@
 import  { useState, useEffect } from 'react';
 import { updateProfileAPI, BACKEND_URL } from '../service/api';
+import toast from 'react-hot-toast';
 
 const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) => {
     const [displayName, setDisplayName] = useState('');
@@ -44,12 +45,12 @@ const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) =>
             const res = await updateProfileAPI(formData);
             console.log("2. Server PHP trả về:", res.data);
             if (res.data.status === 'success') {
-                alert("Cập nhật thông tin thành công!");
+                toast.success("Cập nhật thông tin thành công!");
                 onProfileUpdated(res.data.data); 
                 onClose(); 
             }
         } catch (error) {
-            alert("Lỗi khi cập nhật profile!");
+            toast.error("Lỗi khi cập nhật profile!");
             console.error(error);
         } finally {
             setIsLoading(false);

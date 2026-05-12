@@ -1,22 +1,21 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { forgotPasswordAPI } from '../service/api';
+import toast from 'react-hot-toast';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
-    const [message, setMessage] = useState({ type: '', text: '' });
     const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        setMessage({ type: '', text: '' });
 
         try {
             const res = await forgotPasswordAPI(email);
-            setMessage({ type: 'success', text: res.message });
+            toast.success(res.message);
         } catch (err) {
-            setMessage({ type: 'danger', text: err.response?.data?.message || "Lỗi gửi yêu cầu." });
+            toast.error(err.response?.data?.message || "Lỗi gửi yêu cầu.");
         } finally {
             setIsLoading(false);
         }
@@ -33,7 +32,7 @@ const ForgotPassword = () => {
                                     <h4 className="fw-bold text-primary mb-2">Quên Mật Khẩu</h4>
                                     <p className="text-muted small">Nhập email của bạn để nhận link khôi phục mật khẩu</p>
                                 </div>
-                                {message.text && <div className={`alert alert-${message.type} rounded-3 py-2 text-center small`}>{message.text}</div>}
+                                {/* Notification handled by Toast */}
                                 <form onSubmit={handleSubmit}>
                                     <div className="mb-4">
                                         <label className="form-label fw-medium text-secondary small mb-1">Email</label>
