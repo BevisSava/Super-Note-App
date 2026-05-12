@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # 1. DATABASE (MySQL)
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: note_app
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # 2. BACKEND (PHP + Apache)
+  backend:
+    build:
+      context: ./backend
+    restart: always
+    ports:
+      - "8080:80"  # Ánh xạ port 8080 ra ngoài theo đúng chuẩn Rubric
+    volumes:
+      - ./backend:/var/www/html
+    depends_on:
+      - db
+
+  # 3. FRONTEND (ReactJS)
+  frontend:
+    image: node:18-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "80:5173" # Đưa React ra port 80 (chạy trực tiếp ở localhost)
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - backend
