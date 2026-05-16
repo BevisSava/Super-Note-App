@@ -1,6 +1,5 @@
 # Super Note App 📝
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
 [![PHP](https://img.shields.io/badge/Backend-PHP-777BB4?logo=php)](https://www.php.net/)
 [![Docker](https://img.shields.io/badge/Deployment-Docker-2496ED?logo=docker)](https://www.docker.com/)
