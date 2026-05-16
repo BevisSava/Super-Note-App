@@ -85,6 +85,3 @@ A modern, feature-rich note-taking application designed for performance, securit
 - **Backend**: PHP, Ratchet (WebSocket), Composer.
 - **Database**: MySQL.
 - **DevOps**: Docker, Docker Compose.
-
-## 📝 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
