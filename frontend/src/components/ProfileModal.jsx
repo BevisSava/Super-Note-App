@@ -1,5 +1,5 @@
 import  { useState, useEffect } from 'react';
-import { updateProfileAPI, BACKEND_URL } from '../service/api';
+import { updateProfileAPI, changePasswordAPI, BACKEND_URL } from '../service/api';
 import toast from 'react-hot-toast';
 
 const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) => {
@@ -9,6 +9,13 @@ const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) =>
     const [avatarFile, setAvatarFile] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    
+    // Đổi mật khẩu
+    const [isChangingPassword, setIsChangingPassword] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [isPasswordLoading, setIsPasswordLoading] = useState(false);
 
     useEffect(() => {
         if (profile) {
@@ -57,6 +64,28 @@ const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) =>
         }
     };
 
+    const handlePasswordChange = async (e) => {
+        e.preventDefault();
+        setIsPasswordLoading(true);
+        try {
+            const res = await changePasswordAPI(currentPassword, newPassword, confirmPassword);
+            if (res.data && res.data.status === 'success') {
+                toast.success('Đổi mật khẩu thành công!');
+                setIsChangingPassword(false);
+                setCurrentPassword('');
+                setNewPassword('');
+                setConfirmPassword('');
+            } else {
+                toast.error(res.data?.message || 'Lỗi khi đổi mật khẩu.');
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || 'Lỗi kết nối.');
+            console.error(error);
+        } finally {
+            setIsPasswordLoading(false);
+        }
+    };
+
     if (!show) return null;
 
     return (
@@ -66,10 +95,11 @@ const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) =>
                 <div className="modal-dialog modal-dialog-centered">
                     <div className="modal-content rounded-4 border-0 shadow-lg">
                         <div className="modal-header border-bottom-0">
-                            <h5 className="modal-title fw-bold">Cài đặt Tài khoản</h5>
+                            <h5 className="modal-title fw-bold">{isChangingPassword ? "Đổi mật khẩu" : "Cài đặt Tài khoản"}</h5>
                             <button type="button" className="btn-close" onClick={onClose}></button>
                         </div>
-                        <form onSubmit={handleSubmit}>
+                        {!isChangingPassword ? (
+                            <form onSubmit={handleSubmit}>
                             <div className="modal-body">
                                 <div className="text-center mb-4">
                                     <img 
@@ -87,14 +117,6 @@ const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) =>
                                     <input type="text" className="form-control" value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
                                 </div>
 
-                                {/* Giao diện (Theme) */}
-                                <div className="mb-3">
-                                    <label className="form-label fw-medium">Giao diện (Theme)</label>
-                                    <select className="form-select" value={theme} onChange={(e) => setTheme(e.target.value)}>
-                                        <option value="light">Chế độ Sáng (Light)</option>
-                                        <option value="dark"> Chế độ Tối (Dark)</option>
-                                    </select>
-                                </div>
 
                                 {/* Cỡ chữ */}
                                 <div className="mb-3">
@@ -104,6 +126,17 @@ const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) =>
                                         <option value="medium">Vừa (Medium) - Mặc định</option>
                                         <option value="large">Lớn (Large)</option>
                                     </select>
+                                </div>
+                                
+                                {/* Đổi mật khẩu Button */}
+                                <div className="mt-4 pt-3 border-top">
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-outline-secondary w-100 rounded-3" 
+                                        onClick={() => setIsChangingPassword(true)}
+                                    >
+                                        Đổi mật khẩu
+                                    </button>
                                 </div>
                             </div>
                             <div className="modal-footer border-top-0 bg-transparent rounded-bottom-4 d-flex justify-content-between">
@@ -116,6 +149,63 @@ const ProfileModal = ({ show, onClose, profile, onProfileUpdated, onLogout }) =>
                                 </div>
                             </div>
                         </form>
+                        ) : (
+                        <form onSubmit={handlePasswordChange}>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label className="form-label fw-medium">Mật khẩu hiện tại</label>
+                                    <input 
+                                        type="password" 
+                                        className="form-control" 
+                                        placeholder="Nhập mật khẩu hiện tại" 
+                                        value={currentPassword}
+                                        onChange={(e) => setCurrentPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <label className="form-label fw-medium">Mật khẩu mới</label>
+                                    <input 
+                                        type="password" 
+                                        className="form-control" 
+                                        placeholder="Ít nhất 6 ký tự" 
+                                        value={newPassword}
+                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        required
+                                        minLength="6"
+                                    />
+                                </div>
+                                <div className="mb-4">
+                                    <label className="form-label fw-medium">Xác nhận mật khẩu mới</label>
+                                    <input 
+                                        type="password" 
+                                        className="form-control" 
+                                        placeholder="Nhập lại mật khẩu mới" 
+                                        value={confirmPassword}
+                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        required
+                                        minLength="6"
+                                    />
+                                </div>
+                            </div>
+                            <div className="modal-footer border-top-0 bg-transparent rounded-bottom-4 d-flex justify-content-between">
+                                <button 
+                                    type="button" 
+                                    className="btn btn-outline-secondary rounded-pill px-4"
+                                    onClick={() => setIsChangingPassword(false)}
+                                >
+                                    Quay lại
+                                </button>
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary rounded-pill px-4"
+                                    disabled={isPasswordLoading || !currentPassword || !newPassword || !confirmPassword}
+                                >
+                                    {isPasswordLoading ? 'Đang xử lý...' : 'Xác nhận đổi'}
+                                </button>
+                            </div>
+                        </form>
+                        )}
                     </div>
                 </div>
             </div>

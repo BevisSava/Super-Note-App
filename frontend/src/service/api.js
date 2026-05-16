@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/index.php';
-export const BACKEND_URL = 'http://localhost:8080';
+const API_URL = import.meta.env.VITE_API_URL;
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const getAuthHeader = () => {
     const token = localStorage.getItem('token');
@@ -92,6 +92,14 @@ export const updateProfileAPI = async (formData) => {
             ...getAuthHeader().headers
         }
     });
+};
+
+export const changePasswordAPI = async (currentPassword, newPassword, confirmPassword) => {
+    return await axios.post(`${API_URL}?action=change_password`, {
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword
+    }, getAuthHeader());
 };
 export const getLabelsAPI = async () => {
     return await axios.get(`${API_URL}?action=get_labels`, getAuthHeader());

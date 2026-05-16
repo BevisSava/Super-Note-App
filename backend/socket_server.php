@@ -7,8 +7,8 @@ use Ratchet\Server\IoServer;
 use Ratchet\Http\HttpServer;
 use Ratchet\WebSocket\WsServer;
 
-// Khởi chạy server ở cổng 8080
-$port = 8080;
+// Khởi chạy server (Cổng có thể cấu hình qua biến môi trường)
+$port = getenv('WS_PORT') ?: 8081;
 
 $server = IoServer::factory(
     new HttpServer(

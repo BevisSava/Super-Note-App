@@ -48,7 +48,7 @@ class User {
         return $stmt->execute([':token' => $token, ':expiry' => $expiry, ':email' => $email]);
     }
 
-    // Lấy User dựa vào mã Token (Đảm bảo mã chưa quá hạn)
+    // Lấy User dựa vào mã Token
     public function getUserByResetToken($token) {
         $query = "SELECT * FROM " . $this->table . " WHERE reset_token = :token AND reset_token_expire > NOW()";
         $stmt = $this->conn->prepare($query);
@@ -62,6 +62,15 @@ class User {
         $stmt = $this->conn->prepare($query);
         return $stmt->execute([':password' => $hashed_password, ':user_id' => $user_id]);
     }
+    
+    public function getUserById($id) {
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function getUserProfile($user_id) {
         $query = "SELECT id, email, display_name, avatar_url, theme, font_size, created_at 
                   FROM " . $this->table . " WHERE id = :id LIMIT 1";

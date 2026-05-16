@@ -1,8 +1,8 @@
 <?php
-$host = "127.0.0.1";
-$username = "root";
-$password = "";
-$db_name = "note_app";
+$host = getenv('DB_HOST') ?: "127.0.0.1";
+$username = getenv('DB_USER') ?: "root";
+$password = getenv('DB_PASS') ?: "";
+$db_name = getenv('DB_NAME') ?: "note_app";
 
 try {
 

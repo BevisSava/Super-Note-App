@@ -17,7 +17,10 @@ class NoteController {
         $this->labelModel = new Label($this->db);
     }
 
-    // Hàm dùng chung để kiểm tra Token từ Header của React gửi lên
+    private function sanitizeFileName($filename) {
+        $filename = preg_replace('/[^a-zA-Z0-9\._-]/', '_', $filename);
+        return $filename;
+    }
     private function authenticate() {
         $headers = apache_request_headers();
         if (isset($headers['Authorization'])) {
@@ -61,20 +64,49 @@ class NoteController {
         $color = isset($_POST['color']) ? $_POST['color'] : '#ffffff';
         $image_url = null;
 
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = 'uploads/';
-            $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $new_filename = uniqid() . '.' . $file_extension;
-            $target_file = $upload_dir . $new_filename;
+        if (isset($_FILES['image'])) {
+            if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = 'uploads/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                $original_name = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
+                $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $safe_name = $this->sanitizeFileName($original_name);
+                $new_filename = $safe_name . '_' . uniqid() . '.' . $file_extension;
+                $target_file = $upload_dir . $new_filename;
 
-            $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            if (in_array(strtolower($file_extension), $allowed_types)) {
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                    $image_url = $target_file;
+                $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                if (in_array(strtolower($file_extension), $allowed_types)) {
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                        $image_url = $target_file;
+                    }
                 }
+            } else if ($_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Lỗi upload ảnh: " . $_FILES['image']['error']]);
+                return;
             }
         }
-        $note_id = $this->noteModel->create($user_id, $title, $content, $color, $image_url);
+        $file_url = null;
+        if (isset($_FILES['attached_file'])) {
+            if ($_FILES['attached_file']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = 'uploads/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                $original_name = pathinfo($_FILES['attached_file']['name'], PATHINFO_FILENAME);
+                $file_extension = pathinfo($_FILES['attached_file']['name'], PATHINFO_EXTENSION);
+                $safe_name = $this->sanitizeFileName($original_name);
+                $new_filename = $safe_name . '_' . uniqid() . '.' . $file_extension;
+                $target_file = $upload_dir . $new_filename;
+
+                if (move_uploaded_file($_FILES['attached_file']['tmp_name'], $target_file)) {
+                    $file_url = $target_file;
+                }
+            } else if ($_FILES['attached_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Lỗi upload tệp đính kèm: " . $_FILES['attached_file']['error']]);
+                return;
+            }
+        }
+        $note_id = $this->noteModel->create($user_id, $title, $content, $color, $image_url, $file_url);
         
         if ($note_id) {
             if (isset($_POST['label_ids'])) {
@@ -120,9 +152,9 @@ class NoteController {
         }
     }
 
-    // API: Cập nhật ghi chú (Bảo mật: Chặn sửa nếu đang bị khóa)
+    // API: Cập nhật ghi chú 
     public function updateNote() {
-        $user_id = $this->authenticate(); // Hoặc hàm check token của bạn
+        $user_id = $this->authenticate();
 
         $id = isset($_POST['id']) ? $_POST['id'] : null;
         $title = isset($_POST['title']) ? $_POST['title'] : '';
@@ -137,21 +169,57 @@ class NoteController {
         $image_url = null;
         $has_new_image = false;
 
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            $upload_dir = 'uploads/';
-            $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $new_filename = uniqid() . '.' . $file_extension;
-            $target_file = $upload_dir . $new_filename;
+        if (isset($_FILES['image'])) {
+            if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = 'uploads/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                $original_name = pathinfo($_FILES['image']['name'], PATHINFO_FILENAME);
+                $file_extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $safe_name = $this->sanitizeFileName($original_name);
+                $new_filename = $safe_name . '_' . uniqid() . '.' . $file_extension;
+                $target_file = $upload_dir . $new_filename;
 
-            $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            if (in_array(strtolower($file_extension), $allowed_types)) {
-                if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
-                    $image_url = $target_file;
-                    $has_new_image = true; 
+                $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                if (in_array(strtolower($file_extension), $allowed_types)) {
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $target_file)) {
+                        $image_url = $target_file;
+                        $has_new_image = true; 
+                    }
                 }
+            } else if ($_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Lỗi upload ảnh: " . $_FILES['image']['error']]);
+                return;
             }
         }
-        if ($this->noteModel->update($id, $user_id, $title, $content, $color, $image_url, $has_new_image)) {
+        $file_url = null;
+        $has_new_file = false;
+
+        if (isset($_FILES['attached_file'])) {
+            if ($_FILES['attached_file']['error'] === UPLOAD_ERR_OK) {
+                $upload_dir = 'uploads/';
+                if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                $original_name = pathinfo($_FILES['attached_file']['name'], PATHINFO_FILENAME);
+                $file_extension = pathinfo($_FILES['attached_file']['name'], PATHINFO_EXTENSION);
+                $safe_name = $this->sanitizeFileName($original_name);
+                $new_filename = $safe_name . '_' . uniqid() . '.' . $file_extension;
+                $target_file = $upload_dir . $new_filename;
+
+                if (move_uploaded_file($_FILES['attached_file']['tmp_name'], $target_file)) {
+                    $file_url = $target_file;
+                    $has_new_file = true; 
+                }
+            } else if ($_FILES['attached_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+                http_response_code(400);
+                echo json_encode(["status" => "error", "message" => "Lỗi upload tệp đính kèm: " . $_FILES['attached_file']['error']]);
+                return;
+            }
+        }
+
+        $remove_image = isset($_POST['remove_image']) && $_POST['remove_image'] === '1';
+        $remove_file = isset($_POST['remove_file']) && $_POST['remove_file'] === '1';
+
+        if ($this->noteModel->update($id, $user_id, $title, $content, $color, $image_url, $has_new_image, $file_url, $has_new_file, $remove_image, $remove_file)) {
             if (isset($_POST['label_ids'])) {
                 $label_ids = json_decode($_POST['label_ids'], true);
                 if (is_array($label_ids)) {
@@ -174,7 +242,6 @@ class NoteController {
             echo json_encode(["status" => "error", "message" => "Thiếu ID ghi chú"]);
             return;
         }
-        // Nếu client gửi password trống -> Gỡ mật khẩu
         $password = !empty($data->password) ? password_hash($data->password, PASSWORD_BCRYPT) : null;
 
         $query = "UPDATE notes SET password = :password WHERE id = :id AND user_id = :user_id";
@@ -200,7 +267,6 @@ class NoteController {
             return;
         }
         
-        // Cần Lấy cả password VÀ content từ DB
         $query = "SELECT password, content FROM notes WHERE id = :id AND user_id = :user_id LIMIT 1";
         $stmt = $this->db->prepare($query);
         $stmt->bindParam(':id', $data->note_id);

@@ -67,5 +67,93 @@ class ShareController {
             echo json_encode(["status" => "success", "message" => "Đã chia sẻ ghi chú thành công!"]);
         }
     }
+    // API: Lấy danh sách người được chia sẻ
+    public function getShares() {
+        $owner_id = $this->authenticate();
+        $note_id = isset($_GET['note_id']) ? $_GET['note_id'] : null;
+
+        if (!$note_id) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Thiếu ID ghi chú."]);
+            return;
+        }
+
+        // Kiểm tra quyền sở hữu
+        $check_owner = "SELECT id FROM notes WHERE id = :note_id AND user_id = :user_id";
+        $stmt = $this->db->prepare($check_owner);
+        $stmt->execute([':note_id' => $note_id, ':user_id' => $owner_id]);
+        if ($stmt->rowCount() === 0) {
+            http_response_code(403);
+            echo json_encode(["status" => "error", "message" => "Bạn không phải chủ sở hữu ghi chú này."]);
+            return;
+        }
+
+        $query = "SELECT s.id, s.shared_with_email, s.permission, u.display_name, u.avatar_url 
+                  FROM shares s 
+                  LEFT JOIN users u ON s.shared_with_email = u.email 
+                  WHERE s.note_id = :note_id";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':note_id' => $note_id]);
+        $shares = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        http_response_code(200);
+        echo json_encode(["status" => "success", "data" => $shares]);
+    }
+
+    // API: Cập nhật quyền chia sẻ
+    public function updateShare($data = null) {
+        $owner_id = $this->authenticate();
+        if (empty($data)) $data = json_decode(file_get_contents("php://input"));
+
+        if (empty($data->note_id) || empty($data->email) || empty($data->permission)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Thiếu thông tin."]);
+            return;
+        }
+
+        $check_owner = "SELECT id FROM notes WHERE id = :note_id AND user_id = :user_id";
+        $stmt = $this->db->prepare($check_owner);
+        $stmt->execute([':note_id' => $data->note_id, ':user_id' => $owner_id]);
+        if ($stmt->rowCount() === 0) {
+            http_response_code(403);
+            echo json_encode(["status" => "error", "message" => "Bạn không phải chủ sở hữu ghi chú này."]);
+            return;
+        }
+
+        $update = "UPDATE shares SET permission = :permission WHERE note_id = :note_id AND shared_with_email = :email";
+        $stmtUpdate = $this->db->prepare($update);
+        if ($stmtUpdate->execute([':permission' => $data->permission, ':note_id' => $data->note_id, ':email' => $data->email])) {
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Cập nhật quyền thành công!"]);
+        }
+    }
+
+    // API: Thu hồi quyền chia sẻ
+    public function revokeShare($data = null) {
+        $owner_id = $this->authenticate();
+        if (empty($data)) $data = json_decode(file_get_contents("php://input"));
+
+        if (empty($data->note_id) || empty($data->email)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Thiếu thông tin."]);
+            return;
+        }
+
+        $check_owner = "SELECT id FROM notes WHERE id = :note_id AND user_id = :user_id";
+        $stmt = $this->db->prepare($check_owner);
+        $stmt->execute([':note_id' => $data->note_id, ':user_id' => $owner_id]);
+        if ($stmt->rowCount() === 0) {
+            http_response_code(403);
+            echo json_encode(["status" => "error", "message" => "Bạn không phải chủ sở hữu ghi chú này."]);
+            return;
+        }
+
+        $del = "DELETE FROM shares WHERE note_id = :note_id AND shared_with_email = :email";
+        $stmtDel = $this->db->prepare($del);
+        if ($stmtDel->execute([':note_id' => $data->note_id, ':email' => $data->email])) {
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Đã thu hồi quyền chia sẻ!"]);
+        }
+    }
 }
 ?>

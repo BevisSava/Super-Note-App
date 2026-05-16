@@ -1,10 +1,17 @@
 <?php
 class Database {
-    private $host = "db";
-    private $db_name = "note_app";
-    private $username = "root";
-    private $password = "root";
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
     public $conn;
+
+    public function __construct() {
+        $this->host = getenv('DB_HOST') ?: 'db';
+        $this->db_name = getenv('DB_NAME') ?: 'note_app';
+        $this->username = getenv('DB_USER') ?: 'root';
+        $this->password = getenv('DB_PASS') ?: 'root';
+    }
 
     public function getConnection() {
         $this->conn = null;

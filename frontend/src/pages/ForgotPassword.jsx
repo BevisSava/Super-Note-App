@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { forgotPasswordAPI } from '../service/api';
 import toast from 'react-hot-toast';
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -13,7 +14,9 @@ const ForgotPassword = () => {
 
         try {
             const res = await forgotPasswordAPI(email);
-            toast.success(res.message);
+            toast.success(res.message + " Đang chuyển hướng...");
+            // Chuyển hướng sang trang nhập OTP sau 1.5s để người dùng kịp đọc thông báo
+            setTimeout(() => navigate('/reset-password'), 1500);
         } catch (err) {
             toast.error(err.response?.data?.message || "Lỗi gửi yêu cầu.");
         } finally {

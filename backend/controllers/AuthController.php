@@ -62,15 +62,10 @@ class AuthController {
 
             MailService::sendMail($data->email, $subject, $body);
 
-            $access_token = $this->generateToken();
-            $this->user->updateAccessToken($new_user_id, $access_token);
-
             http_response_code(201);
             echo json_encode([
                 "status" => "success",
-                "message" => "Đăng ký thành công! Vui lòng kiểm tra Email để kích hoạt.",
-                "token" => $access_token,
-                "user" => ["display_name" => $data->display_name, "is_activated" => 0] 
+                "message" => "Đăng ký thành công! Vui lòng kiểm tra Email để kích hoạt tài khoản trước khi đăng nhập."
             ]);
         } else {
             http_response_code(500);
@@ -87,6 +82,13 @@ class AuthController {
         $user_row = $this->user->emailExists($data->email);
 
         if ($user_row && password_verify($data->password, $user_row['password'])) {
+            // KIỂM TRA KÍCH HOẠT EMAIL
+            if ($user_row['is_activated'] == 0) {
+                http_response_code(403);
+                echo json_encode(["status" => "error", "message" => "Tài khoản của bạn chưa được kích hoạt. Vui lòng kiểm tra email."]);
+                return;
+            }
+
             $access_token = $this->generateToken();
             $this->user->updateAccessToken($user_row['id'], $access_token);
 
@@ -113,7 +115,7 @@ class AuthController {
             $stmt->execute();
 
             if ($stmt->rowCount() > 0) {
-                header("Location: " . FRONTEND_URL . "/login?verified=true");
+                header("Location: " . FRONTEND_URL . "/verify-success");
                 exit();
             } else {
                 echo "<h1>❌ Mã kích hoạt không hợp lệ hoặc tài khoản đã được kích hoạt!</h1>";
@@ -135,31 +137,33 @@ class AuthController {
             return;
         }
 
-        $reset_token = bin2hex(random_bytes(16));
-        $expiry_time = date('Y-m-d H:i:s', time() + 900);
+        // Tạo mã OTP 6 số
+        $otp = sprintf("%06d", mt_rand(1, 999999));
+        $expiry_time = date('Y-m-d H:i:s', time() + 900); // 15 phút
 
-        if ($this->user->setResetToken($data->email, $reset_token, $expiry_time)) {
+        if ($this->user->setResetToken($data->email, $otp, $expiry_time)) {
             require_once 'utils/MailService.php';
-            $reset_link = FRONTEND_URL . "/reset-password?token=" . $reset_token;
-            $subject = "Đặt lại Mật khẩu Note App";
+            $subject = "Mã xác thực Đặt lại Mật khẩu";
             $body = "
-                <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                <div style='font-family: Arial, sans-serif; padding: 20px; text-align: center;'>
                     <h2 style='color: #dc3545;'>Đặt lại Mật khẩu</h2>
-                    <p>Bấm vào nút dưới đây để thiết lập mật khẩu mới (Liên kết hết hạn sau 15 phút):</p>
-                    <a href='{$reset_link}' style='padding:10px 20px; background-color:#dc3545; color:#fff; text-decoration:none; border-radius:5px;'>Đổi Mật Khẩu Mới</a>
+                    <p>Mã xác thực (OTP) của bạn là:</p>
+                    <h1 style='letter-spacing: 5px; color: #333; background: #f4f4f4; padding: 10px; display: inline-block; border-radius: 5px;'>{$otp}</h1>
+                    <p>Mã này sẽ hết hạn sau 15 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
                 </div>
             ";
 
             MailService::sendMail($data->email, $subject, $body);
 
             http_response_code(200);
-            echo json_encode(["status" => "success", "message" => "Đã gửi link đặt lại mật khẩu vào email của bạn."]);
+            echo json_encode(["status" => "success", "message" => "Đã gửi mã xác thực (OTP) 6 số vào email của bạn."]);
         } else {
             http_response_code(500);
             echo json_encode(["status" => "error", "message" => "Lỗi hệ thống."]);
         }
     }
     public function resetPassword($data) {
+        // Cập nhật để nhận token (OTP) thay vì email+OTP, hoặc ta giữ nguyên token
         if (empty($data->token) || empty($data->new_password) || empty($data->confirm_password)) {
             http_response_code(400);
             echo json_encode(["status" => "error", "message" => "Thiếu thông tin."]);
@@ -175,7 +179,7 @@ class AuthController {
         $user = $this->user->getUserByResetToken($data->token);
         if (!$user) {
             http_response_code(403);
-            echo json_encode(["status" => "error", "message" => "Đường dẫn không hợp lệ hoặc đã hết hạn!"]);
+            echo json_encode(["status" => "error", "message" => "Mã xác thực không hợp lệ hoặc đã hết hạn!"]);
             return;
         }
 

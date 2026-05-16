@@ -5,8 +5,13 @@ header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-define('FRONTEND_URL', 'http://localhost:5173');
-define('BACKEND_URL', 'http://localhost:8080');
+// Tự động xác định Backend URL
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost:8080';
+define('BACKEND_URL', "$protocol://$host");
+
+// Frontend URL (Có thể cấu hình qua biến môi trường)
+define('FRONTEND_URL', getenv('FRONTEND_URL') ?: '');
 // Xử lý request kiểm tra (Preflight) của trình duyệt
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
@@ -69,11 +74,23 @@ switch ($action) {
     case 'share_note':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') $shareController->shareNote($data);
         break;
+    case 'get_shares':
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') $shareController->getShares();
+        break;
+    case 'update_share':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') $shareController->updateShare($data);
+        break;
+    case 'revoke_share':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') $shareController->revokeShare($data);
+        break;
     case 'get_profile':
         if ($_SERVER['REQUEST_METHOD'] === 'GET') $userController->getProfile();
         break;
     case 'update_profile':
         if ($_SERVER['REQUEST_METHOD'] === 'POST') $userController->updateProfile();
+        break;
+    case 'change_password':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') $userController->changePassword();
         break;
     case 'get_labels':
         if ($_SERVER['REQUEST_METHOD'] === 'GET') $labelController->getAll();

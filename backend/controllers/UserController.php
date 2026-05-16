@@ -78,5 +78,56 @@ class UserController {
             echo json_encode(["status" => "error", "message" => "Lỗi lưu Database."]);
         }
     }
+
+    public function changePassword() {
+        $user_id = $this->authenticate();
+        $data = json_decode(file_get_contents("php://input"));
+
+        $current_password = isset($data->current_password) ? $data->current_password : (isset($_POST['current_password']) ? $_POST['current_password'] : '');
+        $new_password = isset($data->new_password) ? $data->new_password : (isset($_POST['new_password']) ? $_POST['new_password'] : '');
+        $confirm_password = isset($data->confirm_password) ? $data->confirm_password : (isset($_POST['confirm_password']) ? $_POST['confirm_password'] : '');
+
+        if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Vui lòng điền đầy đủ thông tin."]);
+            return;
+        }
+
+        if ($new_password !== $confirm_password) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Mật khẩu mới không khớp."]);
+            return;
+        }
+
+        if (strlen($new_password) < 6) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Mật khẩu mới phải có ít nhất 6 ký tự."]);
+            return;
+        }
+
+        $userModel = new User($this->db);
+        $user = $userModel->getUserById($user_id);
+
+        if (!$user) {
+            http_response_code(404);
+            echo json_encode(["status" => "error", "message" => "Không tìm thấy người dùng."]);
+            return;
+        }
+
+        if (!password_verify($current_password, $user['password'])) {
+            http_response_code(400);
+            echo json_encode(["status" => "error", "message" => "Mật khẩu hiện tại không chính xác."]);
+            return;
+        }
+
+        $hashed_password = password_hash($new_password, PASSWORD_BCRYPT);
+        if ($userModel->updatePassword($user_id, $hashed_password)) {
+            http_response_code(200);
+            echo json_encode(["status" => "success", "message" => "Đổi mật khẩu thành công."]);
+        } else {
+            http_response_code(500);
+            echo json_encode(["status" => "error", "message" => "Lỗi lưu Database."]);
+        }
+    }
 }
 ?>

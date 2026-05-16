@@ -29,7 +29,7 @@ const Register = () => {
     };
 
     return (
-        <div className="vh-100 d-flex justify-content-center align-items-center bg-light bg-gradient py-5">
+        <div className="vh-100 d-flex justify-content-center align-items-center bg-body-tertiary bg-gradient py-5">
             <div className="container">
                 <div className="row justify-content-center">
                     <div className="col-11 col-sm-9 col-md-7 col-lg-5 col-xl-4">
@@ -37,7 +37,7 @@ const Register = () => {
                             <div className="card-body p-4 p-md-5">
                                 <div className="text-center mb-4">
                                     <h3 className="fw-bold text-primary mb-2">Tạo Tài Khoản</h3>
-                                    <p className="text-muted small">Bắt đầu ghi chú với Super Note</p>
+                                    <p className="text-secondary small">Bắt đầu ghi chú với Super Note</p>
                                 </div>
                                 
                                 {/* Notification handled by Toast */}
@@ -45,19 +45,19 @@ const Register = () => {
                                 <form onSubmit={handleRegister}>
                                     <div className="mb-3">
                                         <label className="form-label fw-medium text-secondary small mb-1">Tên hiển thị</label>
-                                        <input type="text" className="form-control form-control-lg bg-light border-0 shadow-none fs-6" placeholder="Ví dụ: Cậu Vàng..." value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
+                                        <input type="text" className="form-control form-control-lg bg-body border-0 shadow-none fs-6" placeholder="Ví dụ: Cậu Vàng..." value={displayName} onChange={(e) => setDisplayName(e.target.value)} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label fw-medium text-secondary small mb-1">Email</label>
-                                        <input type="email" className="form-control form-control-lg bg-light border-0 shadow-none fs-6" placeholder="Nhập email..." value={email} onChange={(e) => setEmail(e.target.value)} required />
+                                        <input type="email" className="form-control form-control-lg bg-body border-0 shadow-none fs-6" placeholder="Nhập email..." value={email} onChange={(e) => setEmail(e.target.value)} required />
                                     </div>
                                     <div className="mb-3">
                                         <label className="form-label fw-medium text-secondary small mb-1">Mật khẩu</label>
-                                        <input type="password" className="form-control form-control-lg bg-light border-0 shadow-none fs-6" placeholder="Tạo mật khẩu..." value={password} onChange={(e) => setPassword(e.target.value)} required />
+                                        <input type="password" className="form-control form-control-lg bg-body border-0 shadow-none fs-6" placeholder="Tạo mật khẩu..." value={password} onChange={(e) => setPassword(e.target.value)} required />
                                     </div>
                                     <div className="mb-4">
                                         <label className="form-label fw-medium text-secondary small mb-1">Xác nhận Mật khẩu</label>
-                                        <input type="password" className="form-control form-control-lg bg-light border-0 shadow-none fs-6" placeholder="Nhập lại mật khẩu..." value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                                        <input type="password" className="form-control form-control-lg bg-body border-0 shadow-none fs-6" placeholder="Nhập lại mật khẩu..." value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
                                     </div>
                                     <button type="submit" className="btn btn-primary btn-lg w-100 rounded-pill shadow-sm fw-bold mt-2">Đăng Ký Ngay</button>
                                 </form>

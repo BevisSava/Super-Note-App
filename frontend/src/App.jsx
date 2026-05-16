@@ -4,6 +4,7 @@ import Register from './pages/Register';
 import Home from './pages/Home';
 import ForgotPassword from './pages/ForgotPassword'; 
 import ResetPassword from './pages/ResetPassword';
+import VerifySuccess from './pages/VerifySuccess';
 import ProtectedRoute from './components/ProtectedRoute';
 import { Toaster } from 'react-hot-toast';
 
@@ -16,6 +17,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verify-success" element={<VerifySuccess />} />
         
         {/* === CÁC TRANG BẢO MẬT === */}
         <Route 
