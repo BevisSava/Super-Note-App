@@ -5,18 +5,15 @@ header("Access-Control-Allow-Methods: POST, GET, OPTIONS, PUT, DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Tự động xác định Backend URL
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-$host = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost:8080';
-define('BACKEND_URL', "$protocol://$host");
-
-// Frontend URL (Có thể cấu hình qua biến môi trường)
-define('FRONTEND_URL', getenv('FRONTEND_URL') ?: '');
-// Xử lý request kiểm tra (Preflight) của trình duyệt
 if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
     http_response_code(200);
     exit();
 }
+
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost:8080';
+define('BACKEND_URL', "$protocol://$host");
+define('FRONTEND_URL', getenv('FRONTEND_URL') ?: 'http://localhost');
 require_once 'controllers/LabelController.php';
 require_once 'controllers/AuthController.php';
 require_once 'controllers/NoteController.php';

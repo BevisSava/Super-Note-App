@@ -45,9 +45,6 @@ class Label {
         return $stmt->execute();
     }
 
-    // ==========================================
-    // CÁC HÀM XỬ LÝ LIÊN KẾT GHI CHÚ V VÀ NHÃN (note_labels)
-    // ==========================================
 
     // Lấy danh sách ID nhãn của 1 ghi chú
     public function getLabelsByNote($note_id) {
@@ -55,7 +52,7 @@ class Label {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':note_id', $note_id);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_COLUMN); // Trả về mảng các ID [1, 2, 3]
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     // Cập nhật nhãn cho ghi chú (Xóa cũ, gắn mới)

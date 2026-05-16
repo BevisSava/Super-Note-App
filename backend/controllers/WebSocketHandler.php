@@ -7,7 +7,7 @@ use Ratchet\ConnectionInterface;
 
 class WebSocketHandler implements MessageComponentInterface {
     protected $clients;
-    protected $subscriptions; // Lưu thông tin: Trình duyệt nào đang xem Note ID nào
+    protected $subscriptions;
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
@@ -22,8 +22,7 @@ class WebSocketHandler implements MessageComponentInterface {
 
     public function onMessage(ConnectionInterface $from, $msg) {
         $data = json_decode($msg, true);
-
-        // Kịch bản 1: User gửi lệnh "join" khi vừa mở màn hình ghi chú
+     
         if (isset($data['action']) && $data['action'] === 'join') {
             $note_id = $data['note_id'];
             $this->subscriptions[$from->resourceId] = $note_id;
@@ -31,11 +30,9 @@ class WebSocketHandler implements MessageComponentInterface {
             return;
         }
 
-        // Kịch bản 2: User gửi lệnh "edit" khi đang gõ phím
         if (isset($data['action']) && $data['action'] === 'edit') {
             $note_id = $data['note_id'];
             
-            // Phát sóng cho TẤT CẢ những người đang xem CÙNG ghi chú này (trừ người vừa gửi)
             foreach ($this->clients as $client) {
                 if ($from !== $client) {
                     if (isset($this->subscriptions[$client->resourceId]) && $this->subscriptions[$client->resourceId] == $note_id) {
@@ -53,7 +50,7 @@ class WebSocketHandler implements MessageComponentInterface {
 
     public function onClose(ConnectionInterface $conn) {
         $this->clients->detach($conn);
-        unset($this->subscriptions[$conn->resourceId]); // Xóa phòng khi họ thoát
+        unset($this->subscriptions[$conn->resourceId]);
         echo "Người dùng {$conn->resourceId} đã thoát\n";
     }
 

@@ -1,67 +1,90 @@
 # Super Note App 📝
 
-A feature-rich, modern note-taking application with real-time collaboration, user authentication, and multi-device synchronization.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
+[![PHP](https://img.shields.io/badge/Backend-PHP-777BB4?logo=php)](https://www.php.net/)
+[![Docker](https://img.shields.io/badge/Deployment-Docker-2496ED?logo=docker)](https://www.docker.com/)
 
-## ✨ Features
+A modern, feature-rich note-taking application designed for performance, security, and ease of use.
 
-- **Modern UI**: Sleek, responsive design with Light/Dark mode support.
-- **Authentication**: Secure registration, login, email verification, and password reset.
-- **Rich Notes**: Create, edit, delete, and pin notes with custom colors and image attachments.
-- **Security**: Protect individual notes with passwords.
-- **Sharing**: Share notes with other users with read/edit permissions.
-- **Labels**: Organize notes using custom labels.
-- **Real-time**: Real-time updates using WebSockets (where applicable).
+---
+
+## 🌏 Language / Ngôn ngữ
+- [English](#english-version)
+- [Tiếng Việt](#phiên-bản-tiếng-việt)
+
+---
+
+## English Version
+
+### ✨ Features
+- **Modern UI**: Sleek, responsive design with full Light/Dark mode support.
+- **Security**: 
+  - JWT Authentication & Email Verification.
+  - Password-protected individual notes.
+- **Rich Content**: Support for images, custom colors, and file attachments.
+- **Real-time Collaboration**: WebSocket integration for instant updates.
+- **Organization**: Categorize notes using custom labels and pins.
+- **Containerized**: Ready-to-use Docker environment.
+
+### 🚀 Getting Started
+
+#### Prerequisites
+- Docker & Docker Compose (Recommended)
+- OR: PHP 8.2+, MySQL 8.0, Node.js 18+
+
+#### Setup with Docker
+1. Clone the repository.
+2. Prepare environment variables:
+   - Copy `backend/.env.example` to `backend/.env`
+   - Copy `frontend/.env.example` to `frontend/.env`
+3. Launch the application:
+   ```bash
+   docker-compose up --build -d
+   ```
+4. Access at: `http://localhost`
+
+---
+
+## Phiên bản Tiếng Việt
+
+### ✨ Tính năng chính
+- **Giao diện hiện đại**: Hỗ trợ đầy đủ chế độ Sáng/Tối (Light/Dark mode).
+- **Bảo mật**: 
+  - Xác thực người dùng qua Email và JWT.
+  - Khóa từng ghi chú bằng mật khẩu riêng.
+- **Nội dung phong phú**: Hỗ trợ đính kèm ảnh, chọn màu ghi chú, đính kèm tệp.
+- **Thời gian thực**: Cập nhật tức thì qua WebSockets.
+- **Quản lý**: Phân loại theo nhãn (Labels) và ghim ghi chú quan trọng.
+
+### 🚀 Hướng dẫn chạy chương trình
+
+#### Yêu cầu hệ thống
+- Docker & Docker Compose (Khuyên dùng)
+
+#### Các bước thực hiện
+1. Sao chép file cấu hình:
+   - Copy `backend/.env.example` -> `backend/.env`
+   - Copy `frontend/.env.example` -> `frontend/.env`
+2. Khởi động với Docker:
+   ```bash
+   docker-compose up --build -d
+   ```
+3. Truy cập tại: `http://localhost`
+
+---
 
 ## 📂 Project Structure
+- `/frontend`: ReactJS + Vite + Bootstrap.
+- `/backend`: PHP Core API + WebSocket Server.
+- `/database`: Database schema and initialization.
+- `/docker-compose.yml`: Full stack orchestration.
 
-- `/frontend`: React + Vite frontend application.
-- `/backend`: PHP backend API.
-- `/database`: Database initialization scripts.
-- `/docker-compose.yml`: Docker configuration for full-stack deployment.
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- PHP 7.4+ (for backend)
-- MySQL/MariaDB
-- Node.js & npm (for frontend)
-- Composer (for backend dependencies)
-- *Optional*: Docker & Docker Compose
-
-### Setup
-
-#### 1. Backend Setup
-```bash
-cd backend
-cp .env.example .env
-# Update .env with your database credentials
-composer install
-php migrate.php # Initialize database tables
-```
-
-#### 2. Frontend Setup
-```bash
-cd frontend
-cp .env.example .env
-# Update .env if necessary
-npm install
-npm run dev
-```
-
-### Using Docker (Recommended)
-```bash
-docker-compose up -d
-```
-The app will be available at `http://localhost:5173`.
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React, Vite, CSS (Vanilla)
-- **Backend**: PHP (Core), Composer
-- **Database**: MySQL
-- **Containerization**: Docker, Docker Compose
+## 🛠 Tech Stack
+- **Frontend**: React, Vite, Bootstrap 5.
+- **Backend**: PHP, Ratchet (WebSocket), Composer.
+- **Database**: MySQL.
+- **DevOps**: Docker, Docker Compose.
 
 ## 📝 License
-
-This project is open-source. Feel free to use and modify.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -41,7 +41,6 @@ const Login = () => {
                                 {error && <div className="alert alert-danger rounded-3 py-2 text-center small">{error}</div>}
 
                                 <form onSubmit={handleLogin}>
-                                    {/* Nhóm Email */}
                                     <div className="mb-4">
                                         <label className="form-label fw-medium text-secondary small mb-1">Email</label>
                                         <div className="input-group input-group-lg rounded-3 overflow-hidden shadow-sm border">
@@ -59,7 +58,6 @@ const Login = () => {
                                         </div>
                                     </div>
 
-                                    {/* Nhóm Mật khẩu */}
                                     <div className="mb-4">
                                         <label className="form-label fw-medium text-secondary small mb-1">Mật khẩu</label>
                                         <div className="input-group input-group-lg rounded-3 overflow-hidden shadow-sm border">
