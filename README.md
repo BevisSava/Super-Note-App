@@ -2,6 +2,7 @@
 
 [![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react)](https://reactjs.org/)
 [![PHP](https://img.shields.io/badge/Backend-PHP-777BB4?logo=php)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/Database-MySQL-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Docker](https://img.shields.io/badge/Deployment-Docker-2496ED?logo=docker)](https://www.docker.com/)
 
 A modern, feature-rich note-taking application designed for performance, security, and ease of use.
